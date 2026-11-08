@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 # Create your models here.
@@ -38,3 +39,31 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+class Quiz(models.Model):
+    module = models.OneToOneField(CourseModule, on_delete=models.CASCADE, related_name='quiz')
+    title = models.CharField(max_length=300)
+    pass_score = models.PositiveIntegerField(
+        default=70,validators=[MinValueValidator(1),MaxValueValidator(100)],
+
+    )
+    class Meta:
+        verbose_name_plural='quizzes'
+    def __str__(self):
+        return self.title
+
+class Question(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text=models.TextField()
+    order=models.PositiveBigIntegerField(default=1)
+
+    class Meta:
+        ordering=['order']
+    def __str__(self):
+        return self.text
+class Choice(models.Model):
+    question=models.ForeignKey(Question, on_delete=models.CASCADE,related_name='choices')
+    text=models.CharField(max_length=300)
+    is_correct=models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.text
